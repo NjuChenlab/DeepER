@@ -22,7 +22,7 @@ DeepER contains the following files:
 
 Our DeepER training steps are as follows:
 
-### step1.Convert genome file (.fa.gz) into pkl format file.
+### step1.Convert genome file (.fa.gz) into pkl format file
 
 ```bash
 python predata.py convert_pkl -gzip_fa_file traindata/genomefile/hg38.fa.gz
