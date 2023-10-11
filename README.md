@@ -2,9 +2,10 @@
 
 ## Introduction
 
-DeepeR is a deep learning-based tool to predict R-loop forming sequences. The basic framework of DeepeR includes one layer of Bi-LSTM and four layers of Bi-LSTM with residual blocks, followed by a fully connected layer activated by softmax. Base-level probability of R-loop fromation will be predicted for a given 5kb-long sequence. A sliding window approach (window size = 200bp and step size = 10bp) is then applied to find R-loop-forming regions, defined as consecutive sequences showing average probability >= 0.947 (default cut_off).
+DeepER is a deep learning-based tool to predict R-loop forming sequences. The basic framework of DeepER includes one layer of Bi-LSTM and four layers of Bi-LSTM with residual blocks, followed by a fully connected layer activated by softmax. Base-level probability of R-loop fromation will be predicted for a given 5kb-long sequence. A sliding window approach (window size = 200bp and step size = 10bp) is then applied to find R-loop-forming regions, defined as consecutive sequences showing average probability >= 0.947 (default cut_off).
 
-You can make predictions for any sequence that meets the criteria through the DeepER's online site(https://rloopbase.nju.edu.cn/deepr/tool/model/), or you can pull up a DeepER Docker image to use the model locally.
+You can predict R-loop formation sites with DeepER web server 
+(https://rloopbase.nju.edu.cn/deepr/tool/model/) or pull up a DeepER Docker image to use the model locally.
 
 DeepER contains the following files:
 
@@ -67,7 +68,7 @@ Running the above code yields the following file:
 
 `predict/`: This file stores the probability values of each chromosome predicted to be R-loop.
 
-### step5.Defines the R-loop forming regions
+### step5.Define the R-loop forming regions
 
 ```bash
 python def_peaks.py Rloop_position -pre_result_path predict/result/ -prob 0.947 -path_save predict/Res_Bidir_LSTM/
