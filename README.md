@@ -28,7 +28,7 @@ python predata.py convert_pkl -gzip_fa_file traindata/genomefile/hg38.fa.gz
 -gzip_fa_file (The path to genome file)
 ```
 
-### step2.prepare label file
+### step2.Prepare label file
 
 ```bash
 python predata.py label -pkl_path traindata/hg38_pkl/ -bedfile traindata/RChIP.intersect.bed
@@ -36,9 +36,9 @@ python predata.py label -pkl_path traindata/hg38_pkl/ -bedfile traindata/RChIP.i
 -bedfile (The more accurate R-loop peaks identified by R-ChIP technology in the paper)
 ```
 
-### step3.train/validate/test the model
+### step3.Train/Validate/Test the model
 
-Warning: Note that when running the following code, make sure that the config.py file contains checkpoint='' and is_train = True
+Warning: Note that when running the following code, make sure that the `config.py` file contains `checkpoint=''` and `is_train = True`.
 
 ```bash
 python main.py -width 5000 -label traindata/label_intersect/ -neg traindata/neg_5k.bed -pkl_path traindata/hg38_pkl/
@@ -49,12 +49,14 @@ python main.py -width 5000 -label traindata/label_intersect/ -neg traindata/neg_
 ```
 
 Running the above code yields the following two files:
-`Checkpoints_window/`  ---This file stores the best models produced during the model run
-`img_window/`          ---This file stores each indicator graph during the operation of the model, including loss function, accuracy rate, PR curve, etc
 
-### step4.predict the genome-wide R-loops (The output result is the probability value of each base predicted to be R-loop)
+`Checkpoints_window/` : This file stores the best models produced during the model run.
 
-Warning: Note that when running the following code, make sure that the config.py file contains checkpoint='./Checkpoints_window/' + name_modle + '/best_model.pth' and is_train = None
+`img_window/`                  : This file stores each indicator graph during the operation of the model, including loss function, accuracy rate, PR curve, etc.
+
+### step4.Predict the genome-wide R-loops (The output result is the probability value of each base predicted to be R-loop)
+
+Warning: Note that when running the following code, make sure that the `config.py` file contains `checkpoint='./Checkpoints_window/' + name_modle + '/best_model.pth'` and `is_train = None`.
 
 ```bash
 python main.py -width 5000 -label traindata/label_intersect/ -neg traindata/negtest.bed -pkl_path traindata/hg38_pkl/
@@ -62,7 +64,8 @@ The meanings of each parameter options are as above (step3)
 ```
 
 Running the above code yields the following file:
-`predict/`   ---This file stores the probability values of each chromosome predicted to be R-loop
+
+`predict/`: This file stores the probability values of each chromosome predicted to be R-loop.
 
 ### step5.Defines the R-loop forming regions
 
