@@ -22,14 +22,14 @@ DeepER contains the following files:
 
 Our DeepER training steps are as follows:
 
-### step1.Convert genome file (.fa.gz) into pkl format file
+### step1. Convert genome file (.fa.gz) into pkl format file
 
 ```bash
 python predata.py convert_pkl -gzip_fa_file traindata/genomefile/hg38.fa.gz
 -gzip_fa_file (The path to genome file)
 ```
 
-### step2.Prepare label file
+### step2. Prepare label file
 
 ```bash
 python predata.py label -pkl_path traindata/hg38_pkl/ -bedfile traindata/RChIP.intersect.bed
@@ -37,7 +37,7 @@ python predata.py label -pkl_path traindata/hg38_pkl/ -bedfile traindata/RChIP.i
 -bedfile (The more accurate R-loop peaks identified by R-ChIP technology in the paper)
 ```
 
-### step3.Train/Validate/Test the model
+### step3. Train/Validate/Test the model
 
 Warning: Note that when running the following code, make sure that the `config.py` file contains `checkpoint=''` and `is_train = True`.
 
@@ -55,7 +55,7 @@ Running the above code yields the following two files:
 
 `img_window/`                  : This file stores each indicator graph during the operation of the model, including loss function, accuracy rate, PR curve, etc.
 
-### step4.Predict the genome-wide R-loops (The output result is the probability value of each base predicted to be R-loop)
+### step4. Predict the genome-wide R-loops (The output result is the probability value of each base predicted to be R-loop)
 
 Warning: Note that when running the following code, make sure that the `config.py` file contains `checkpoint='./Checkpoints_window/' + name_modle + '/best_model.pth'` and `is_train = None`.
 
@@ -68,7 +68,7 @@ Running the above code yields the following file:
 
 `predict/`: This file stores the probability values of each chromosome predicted to be R-loop.
 
-### step5.Define the R-loop forming regions
+### step5. Define the R-loop forming regions
 
 ```bash
 python def_peaks.py Rloop_position -pre_result_path predict/result/ -prob 0.947 -path_save predict/Res_Bidir_LSTM/
