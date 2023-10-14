@@ -55,7 +55,9 @@ Running the above code yields the following two files:
 
 `img_window/`                  : This file stores each indicator graph during the operation of the model, including loss function, accuracy rate, PR curve, etc.
 
-### step4. Predict the genome-wide R-loops (The output result is the probability value of each base predicted to be R-loop)
+### step4. Predict the genome-wide R-loops 
+
+Note: The output result is the probability value of each base predicted to be R-loop.
 
 Warning: Note that when running the following code, make sure that the `config.py` file contains `checkpoint='./Checkpoints_window/' + name_modle + '/best_model.pth'` and `is_train = None`.
 
