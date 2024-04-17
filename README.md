@@ -1,7 +1,7 @@
 ## Introduction
 DeepER is a deep learning-based tool to predict R-loop forming sequences. The basic framework of DeepER includes one layer of Bi-LSTM and two layers of Bi-LSTM with residual blocks, followed by a fully connected layer activated by sigmoid. Base-level probability of R-loop fromation will be predicted for a given 5kb-long sequence.  
 DeepER-deploy is the most simple version to deploy DeepER model. 
-You can predict R-loop formation sites with DeepER web server ([https://rloopbase.nju.edu.cn/deepr/tool/model/](https://rloopbase.nju.edu.cn/deepr/tool/model/)) or download DeepER's source code from  our github library runing it locally.
+You can predict R-loop formation sites with DeepER web server ([https://rloopbase.nju.edu.cn/deepr/tool/model](https://rloopbase.nju.edu.cn/deepr/tool/model)) or download DeepER's source code from  our github library runing it locally.
 
 DeepER-deploy contains the following files:
 
