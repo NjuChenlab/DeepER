@@ -14,10 +14,6 @@ from torch.utils.data import DataLoader
 from sklearn.utils import shuffle
 
 
-# 当只需要切分bed文件时，或者可以包含在Preprocess中
-def split_bed():
-    pass
-
 #实际上,最好书写预处理代码方式是定义一个预处理父类,之后再写吧
 class Preprocess():
     '''
@@ -339,10 +335,6 @@ class SlidePrepocess():
                 laplis.append((start,end,f"{i[0]}:{i1}-{i2}"))    
         return laplis
 
-
-
-
-
 #新的数据预处理方式,随机边长处理,在Rloop前后随机一定长度
 class RandPreProcess():
     def __init__(self,
@@ -400,7 +392,6 @@ class RandPreProcess():
             self.orignbed = pd.concat([bed,self.orignbed])
             bed["Tech"] = tech
 
-
     def addtechfile(self,path,readtech=True):
         '''
         读取带有测序技术标记的文件\n
@@ -424,7 +415,6 @@ class RandPreProcess():
         for i in range(len(self.processbed)):
             self.processbed[i] = self.single_process(self.processbed[i],method)
 
-    #
     def single_process(self,df:pd.DataFrame,method=None):
         '''
         处理数据，基本思路是分染色体，之后滑窗再将区域内重叠（或否）的序列标记\n
@@ -474,7 +464,6 @@ class RandPreProcess():
         elif isinstance(self.processbed,pd.DataFrame):
             self.processbed.to_csv(path+"\\"+filename+f"-{j}"+".bed",sep='\t',index=0,header=0,mode='w')
 
-    #工具函数
     #滑动窗口
     def slide_window(self,df):
         '''
@@ -580,9 +569,6 @@ class RandPreProcess():
                 laplis.append((start,end,f"{i[0]}:{i1}-{i2}"))    
         return laplis
 
-
-
-
 #先这样把
 def makeneg(negfile,new,rate):
     f = open(negfile,mode="r")
@@ -596,10 +582,6 @@ def makeneg(negfile,new,rate):
             lis[3] = ";0-0"
             new.write("\t".join(lis))
         
-
-
-
-
 #读取fasta类型文件的类
 class FastaLoader():
     def __init__(self,

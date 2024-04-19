@@ -155,7 +155,7 @@ class train_log():
             display.clear_output(wait=True)
         elif self.env == "Console":
             for i in range(len(self.namelis)):
-                for j in range(len(self.namelis)):
+                for j in range(len(self.namelis[i])):
                     b = self.namelis[i][j]
                     a = self.getnumlog(b)
                     self.ax[i//self.cols,i%self.cols].plot(list(range(len(a))),a,color=self.colors[i][j],label=b)

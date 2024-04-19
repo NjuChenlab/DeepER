@@ -3,13 +3,13 @@ NAME
     lib.py
 --------------------------------------------------------
 DESCRIPTION
-    This is the lib which contain all the function when deploy the model.
+    This is the lib which contains all the function when deploy the model.
 
     该库包括部署模型所用的全部函数
 --------------------------------------------------------
 NAVIGATION
     To know how to load the fasta sequence,read strloader and quickloader class.
-    To know how to use model and predict sequence,read Predict class.
+    To know how to use model and predict sequence, read Predict class.
     The reserve class present a convenient way to save the result.
 
     要了解如何加载fasta序列，请阅读strloader和quickloader类。
@@ -179,10 +179,10 @@ class quickloader(Dataset):
         '''
         Args:
             path:the path of fasta file;
-            cutlen:the longer sequence will be cut into this length.the shorter will be polished to this length.
-                   See more details in quickloader.Intercept method;
-            batch_size:The size of parallel operation sequences,larger values can accelerate operations, 
-                       but will increase memory overhead;
+            cutlen:Sequences longer than the cutlen will be cut into the cutlen.The shorter will be added to this length.
+                See more details in quickloader.Intercept method;
+            batch_size:The size of parallel operation segments,larger values can accelerate operations, 
+                    but will increase memory overhead;
             
             path:fasta文件的路径
             cutlen:较长的序列将被切成这个长度。较短的序列将增加成这个长度。查看quickloader.Intercept方法以见更多细节
@@ -295,7 +295,6 @@ class strloader(Dataset):
         The sequence longer or shorter than expected will be dealed into the expected length(also see in strloader.Intercept Method)
         User can get the sequence from the index or header info.
     
-        
         该类用来从fasta格式字符串中轻量化读取序列,它以[[headerinfo,seq],[headerinfo,seq],...,[headerinfo,seq]]的形式保存数据。
         比预期长度长或短的序列将被处理为预期长度（另请参阅strloader.Intercept Method）
         用户可以使用index或者headerinfo来获取所需序列
@@ -478,44 +477,6 @@ def cut_seq(seq,length) -> list:
     return re
 
 
-#定义Rloop区间的方式
-def defregion(data01,cut_off):
-    '''
-    Description:
-        it takes a numpy.ndarray as input and give back the region which averagely larger than cutoff value.
-
-        它以numpy.ndarray作为输入，并返回平均大于截止值的区域。
-    ----------------------------------------
-    we suggest user define a function themself.
-    我们建议用户自定义该函数。
-    '''
-    rloop = {}
-    count,num = 0,0
-    xregion,textlabel = [],[]
-    length = len(data01)-200
-    
-    for m in range(0,length+1,10):
-        n = m+200
-        region = data01[m:n]
-        #print(len(region))
-        if sum(region)/len(region)>=cut_off:
-            count += 1
-            rloop[count]=[m,n]
-    for m in range(1,count):
-        x = rloop[m][0]
-        y = rloop[m][1]
-        z = rloop[m+1][0]
-        h = rloop[m+1][1]
-        if y>z:
-            del rloop[m]
-            del rloop[m+1]
-            rloop[m+1] = [x,h]
-    
-    for value in rloop.values():
-        xregion.append(value)
-        textlabel.append(value[0])
-        textlabel.append(value[1])
-    return(xregion,textlabel)
 
 
 #部署使用的类
@@ -525,7 +486,7 @@ class PreDict():
         PreDict
     ---------------------------------------------
     Description
-        This class is used to predict the sequence from the loader(strloader or fastaloader).
+        This class is used to predict the sequence from the loader(strloader or quickloader).
         The results will save as the form -- [(headerinfo,point_probability,additional message),...]
         Every result can be visited by using headerinfo.
         
@@ -538,24 +499,18 @@ class PreDict():
         To see how to get the predict result,read getitems and getitem and getallresults method.
     '''
     def __init__(self,data,model,para,codemode,
-                 strand,cut_off,mutli=False,
-                 regionfunc=defregion,
-                 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')) -> None:
+                 strand,mutli=False,
+                 device='cuda' if torch.cuda.is_available() else 'cpu') -> None:
         '''
         Args:
             data:The loader(see in strloader or fastaloader class)
             model:The class(nn.Module) of used model.The define of the model are writen in model.py 
                   Or user can define a model using pytorch themself.
             para:The corresponding para file of the model class.
-            codemode:The code mode which the model class take.(either one-hot coding or label coding)
-            starnd:The sequence model will predict.When user gives 'forward',model will predict the sequence directly.
+            codemode: The code mode which the model class take.(either one-hot coding or label coding)
+            strand:The sequence model will predict.When user gives 'forward',model will predict the sequence directly.
                    Otherwise,model will predict the reverse complementarity sequence of the given DNA sequence.
-            cut_off:When the predicted probability is larger than it,this point is considered a true point of Rloop.
             mutli:Whether to use multi-gpu resoucre to speed up.Please keep it False when there is not gpu to use.
-            regionfunc:The judge func which define the true Rloop region.The result will add to the additonal message position(See in class Description).
-                       When user define the function themself,please notice that the function should take two args:
-                        a one dim numpy array(represent the predict results),a float number(represent the cutoff value).
-                        returns can be at will. Users can access this additional information through other methods
             device:The enviornment the model will work on(gpu or cpu).We recommend gpu to speed up prediction.
         
             data:加载程序（请参阅strloader或fastaloader类中的）
@@ -565,13 +520,9 @@ class PreDict():
             codemode：模型类采用的代码模式。（一个热编码或标签编码）
             stand：序列模型会预测。当用户给出“正向”时，模型将直接预测序列。
                    否则，该模型将预测给定DNA序列的反向互补序列。
-            cut_off：当预测的概率大于它时，该点被认为是Rloop的真点。
             mutli：是否使用多gpu资源加速。当没有gpu可供使用时，请将其保留为False。
-            regionfunc：判定函数，它定义了真正的Rloop区域。结果将添加到附加消息位置（请参见类描述）
-                        当用户自己定义函数时，请注意该函数应该使用两个参数：
-                        一个一维numpy数组（表示预测结果）、一个浮点数（表示截止值）。
-                        返回值可以随意，用户可以通过其他方法访问这个附加信息。
             device：模型将工作的环境（gpu或cpu）。我们建议gpu加快预测速度。
+
         Example:
             >>>from Model import DRBiLSTM
             >>>fa = quickloader("path_to_fastafile",16)
@@ -586,16 +537,14 @@ class PreDict():
             shuffle=False,
             num_workers=1
         )
-        self.func = regionfunc
         self.device = device
         self.codemode = codemode
         param = model.default
         self.model = model(*param).to(device)
-        self.model.load_state_dict(torch.load(para))
+        self.model.load_state_dict(torch.load(para,map_location=device))
         if mutli:
             self.model = DataParallel(self.model)
         self.strand = strand
-        self.cutoff = cut_off
         self.model.eval()
         self.re = {}
         self.length = len(data)
@@ -609,17 +558,10 @@ class PreDict():
             x = codeall(batch_x,codemode).to(device).to(torch.float)
             pred = self.model(x.to(self.device))
             for i in range(pred.shape[0]):
-                if self.func == None:
-                #self.re[headinfo] = (batch_x[i],pred[i].cpu().detach().numpy(),regionfunc(pred[i],self.cutoff)) 滑窗
-                    if self.strand =="forward":
-                        self.re[headinfo[i]] = (batch_x[i],pred[i].cpu().detach().numpy())
-                    else:
-                        self.re[headinfo[i]] = (batch_x[i],np.flip(pred[i].cpu().detach().numpy(),axis=0))
+                if self.strand =="forward":
+                    self.re[headinfo[i]] = (batch_x[i],pred[i].cpu().detach().numpy())
                 else:
-                    if self.strand =="forward":
-                        self.re[headinfo[i]] = (batch_x[i],pred[i].cpu().detach().numpy(),regionfunc(pred[i].cpu().detach().numpy(),self.cutoff))
-                    else:
-                        self.re[headinfo[i]] = (batch_x[i],np.flip(pred[i].cpu().detach().numpy(),axis=0),regionfunc(np.flip(pred[i].cpu().detach().numpy(),axis=0),self.cutoff))
+                    self.re[headinfo[i]] = (batch_x[i],np.flip(pred[i].cpu().detach().numpy(),axis=0))
             j += len(batch_x)
             print(f"Finished: {j}/{self.length}")
 
@@ -632,13 +574,13 @@ class PreDict():
             对某条序列的反向互补链预测，但请注意，这个方法是不安全的，
             如有需要，请在一开始预测的时候就设置strand变量为'reverse'
         Example:
-            >>>predict = PreDict(fa,DRBiLSTM,r"\best_model.pkl","hc",strand,cut_off,mutli=True)
+            >>>predict = PreDict(fa,DRBiLSTM,r"\best_model.pkl","hc",strand,mutli=True)
             >>>predict.get_rev("testseq1")
         '''
         chain = rev_chain(self.re[headinfo][0])
         x = codeall(chain,self.codemode)
         pred = self.model(x)
-        res = (self.re[headinfo][0],pred[0],self.func(pred[0],self.cutoff))
+        res = (self.re[headinfo][0],pred[0])
         self.re[headinfo+"_rev"] = res
         return res
 
@@ -701,8 +643,6 @@ class PreDict():
             >>>predict.getallresults()
         '''
         return self.re
-
-
 
 #
 class reserve():

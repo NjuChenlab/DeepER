@@ -22,8 +22,8 @@ def coding(string,mode="dc",ebsize=1,step=1):
         "N":[0,0,0,0],
         "A":[1,0,0,0],
         "C":[0,1,0,0],
-        "G":[0,0,0,1],
-        "T":[0,0,1,0]
+        "G":[0,0,1,0],
+        "T":[0,0,0,1]
     }
     cd = []
     for i in list(string):
@@ -80,7 +80,6 @@ def rev_chain(chain:str):
             raise ValueError("Unknown base"+chain[i])
     return re
 
-
 #模型用函数
 def initialize_weights(model):
     for m in model.modules():
@@ -114,12 +113,10 @@ def make_Model_single_GPU(model:nn.Module):
             # print(name)
     print("finish")
 
-
 #随机颜色
 def randcolor():
     colors = ["#3a30d9", "#2189c9", "#b8c63a", "#ce3235", "#bc0eaa", "#1d871e", "#a43255", "#2366a9", "#2d2414", "#696895", "#4609a6", "#f30be2", "#82de8c", "#65cf2d", "#0742da", "#aba26f", "#f8023f", "#7eeab2", "#681f31", "#bec3de", "#10aa11", "#5db2c6", "#8de172", "#79c2c0", "#313d05", "#ef6a69", "#fec480", "#d10956", "#4df132", "#68d206"]
     return choice(colors)
-
 
 #随机颜色列表
 def randcolor_lis(lisshape:list):

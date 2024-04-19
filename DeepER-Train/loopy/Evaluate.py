@@ -109,52 +109,6 @@ def testprocess(loader,model,codemode,lossfunc,device,pvalue,windowlen,windowste
         rF1= 0 
     return re/i,(p_accuracy,pP,pR,pF1),(r_accuracy,rP,rR,rF1)
 
-def testprocess_2(loader,model,codemode,lossfunc,device,pvalue,windowlen,windowstep):
-    '''
-    之后还是得加权
-    lossfunc:可为None，None时跳过求testloss
-    '''
-    re = 0
-    i = 0
-    pTP,pFN,pTN,pFP = 0,0,0,0
-    rTP,rFN,rTN,rFP = 0,0,0,0
-    
-    for step,(batch_x,batch_y,chrinfo) in enumerate(loader):
-        i+=1
-        x = ut.codeall(batch_x,codemode).to(device).to(torch.float)
-        # x = ut.codeall(batch_x).to(device).to(torch.float)
-        # labels = ut.makelabel(batch_y[0],batch_y[1],1000).to(device).to(torch.float)
-        labels =batch_y.to(device).to(torch.float)
-        #对label处理下，防止inf
-        labels = abs(labels-torch.tensor(0.000001,dtype=torch.float, device=device))
-
-        pred = model(x)
-        if lossfunc != None:
-            loss = lossfunc(pred,labels).to(torch.float)
-            re +=loss.item()
-        
-        
-        pTP_,pFN_,pTN_,pFP_ = point_evaluate(pvalue,pred,labels,mode="test")
-        pTP += pTP_
-        pFN += pFN_
-        pTN += pTN_
-        pFP += pFP_
-
-    try:
-        p_accuracy = (pTP+pTN)/(pTP+pFN+pTN+pFP)
-    except:
-        p_accuracy = 0
-    try:
-        pP = pTP/(pTP+pFP)
-        pR = pTP/(pTP+pFN)
-        pF1=2*(pP*pR)/(pP+pR)
-    except:
-        pP = 0
-        pR = 0
-        pF1= 0 
-    return re/i,(p_accuracy,pP,pR,pF1)
-
-
 import numpy as np
 from sklearn.metrics import confusion_matrix
 # 点精度评估
@@ -176,18 +130,6 @@ def point_evaluate(pvalue,pred,label,mode="train"):
     label[mask1] = 1
     label[mask0] = 0
     confusion_matrix_result = confusion_matrix(label.cpu().detach().numpy().flatten(),pred.cpu().detach().numpy().flatten())
-#     diff = torch.abs(pred-label)
-#     #正确率计算
-#     correct = (diff <= pvalue).float()
-#     accuracy = torch.mean(correct).item()
-#     # label正确情况下
-#     mask1 = label >= pvalue
-#     TP = torch.sum(correct[mask1]).item()
-#     FN = torch.sum(abs(correct-1)[mask1]).item()
-#     # label不正确的情况下
-#     mask0 = label < pvalue
-#     TN = torch.sum(correct[mask0]).item()
-#     FP = torch.sum(abs(correct-1)[mask0]).item()
     try:
         TP = confusion_matrix_result[1, 1]  # 第1行和第1列表示正例
         FP = confusion_matrix_result[0, 1]  # 第0行和第1列表示负例预测为正例
@@ -226,33 +168,35 @@ def old_region_evaluate(pvalue,pred,label,windowlen=200,step=20,mode="train"):
     judge = torch.abs(label-pred)
     for i in range(pred.shape[0]):
         a = pred[i]
+        new = torch.zeros((a.shape[0],))
+        for k in range(0,a.shape[0]-200+1,10):
+            if torch.sum(a[k:k+200])/windowlen > 0.95:
+                new[k:k+200] = 1
         b = label[i]
         j = judge[i]
         start = 0
         while 1:
             if start+windowlen < a.shape[0]:
-                aa = a[start:start+windowlen]
+                aa = new[start:start+windowlen]
                 bb = b[start:start+windowlen]
-                jj = j[start:start+windowlen]
                 #核心评估方式
                 count1 = torch.sum(bb > 1-pvalue).item()    #判断bb为正例还是负例，若一半为正就是正例
-                count2 = torch.sum(jj < pvalue).item()    #判断jj正确与否
+                count2 = torch.sum(aa > 1-pvalue).item()    #判断jj正确与否
 
-                if count1 > bb.shape[0] // 4:
+                if count1 > (windowlen*0):
                     #正例
                     #判断是否分类正确
-                    if count2 > jj.shape[0] //2:
+                    if count2 > (windowlen*0):
                         TP += 1
                     else:
                         FN += 1
                 else:
                     #负例
                     #判断是否分类正确
-                    if count2 > jj.shape[0] //2:
+                    if count2 <= (windowlen*0):
                         TN += 1
                     else:
                         FP += 1
-
                 start += step
             else:
                 break
@@ -269,7 +213,6 @@ def old_region_evaluate(pvalue,pred,label,windowlen=200,step=20,mode="train"):
         return accuracy,P,R,F1
     if mode == "test":
         return TP,FN,TN,FP
-
 
 #滑窗切分
 def sliding_window_binarize(x, window_size, pvalue, stride=1):
@@ -290,7 +233,6 @@ def sliding_window_binarize(x, window_size, pvalue, stride=1):
         num_above = above_thresh.sum(dim=1)
         out[:, i//stride] = (num_above >= window_size/2).long()
     return out
-
 
 
 #简单效果可视化部分
@@ -351,7 +293,6 @@ def seeresults(data,Model,Para,device,allcodemode,param):
         plt.show()
         break
 
-
 #绘图部分，绘图部分着重于对比不同模型间差异，要求函数可以加入不同模型的结果
 #点精度的ROC曲线绘制
 def get_p_roc(data,Model,para:list,allcodemode,names:list,device,param,savepath=None):
@@ -387,7 +328,6 @@ def get_p_roc(data,Model,para:list,allcodemode,names:list,device,param,savepath=
         torch.cuda.reset_max_memory_allocated() 
     
     plot_multi_roc(y_trues,y_scores,names,savepath)
-
 
 def get_r_roc(data,Model,Para,allcodemode,names,device,windowlen,windowstep,pvalue,savepath=None):
     '''
@@ -516,8 +456,6 @@ def radar_plot(names:list,data:dict,savepath=None):
     if savepath != None:
         plt.savefig(savepath)
     plt.show()
-
-
 
 #模型用时和内存占用对比函数
 def timeplot(data,Model,Para,allcodemode,devicename:str=("gpu","cpu"),lossfunc=None,savepath=None):

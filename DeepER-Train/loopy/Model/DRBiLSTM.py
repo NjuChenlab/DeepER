@@ -61,33 +61,6 @@ class DRBiLSTM(nn.Module):
 
         return F.sigmoid(x)[:,:,1]
 
-class sp_DeepER(nn.Module):
-    def __init__(self) -> None:
-        super(sp_DeepER,self).__init__()
-        self.lstm1 = nn.LSTM(4,32//2,2,bidirectional=True)
-        self.lstm1.flatten_parameters()
-        self.resLSTM1 = resLSTMblock(32,32,2,True)
-        self.resLSTM2 = resLSTMblock(32,32,2,True)
-        self.resLSTM3 = resLSTMblock(32,32,2,True)
-        self.resLSTM4 = resLSTMblock(32,32,2,True)
-        
-        self.fc = nn.Linear(32,2)
-
-    def forward(self,x):
-        re = []
-        x = x.permute(1,0,2)
-        x,_ = self.lstm1(x)
-        x = self.resLSTM1(x)
-        re.append(F.sigmoid(self.fc(x).permute(1,0,2))[:,:,1].cpu().detach())
-        x = self.resLSTM2(x)
-        re.append(F.sigmoid(self.fc(x).permute(1,0,2))[:,:,1].cpu().detach())
-        x = self.resLSTM3(x)
-        re.append(F.sigmoid(self.fc(x).permute(1,0,2))[:,:,1].cpu().detach())
-        x = self.resLSTM4(x)
-        re.append(F.sigmoid(self.fc(x).permute(1,0,2))[:,:,1].cpu().detach())
-        x = x.permute(1,0,2)
-        return re
-
 
 #测试
 if __name__ =="__main__":
