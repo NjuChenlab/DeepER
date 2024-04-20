@@ -11,7 +11,7 @@ DeepER contains the following files:
          - Unet.py (the Unet's architecture)
          - Model.py (other model such as feedforward network)
       - myData.py (the module to prepare data and read data)
-      - Evaluate (the module to evaluate the results)
+      - Evaluate.py (the module to evaluate the results)
       - Train.py (the module which packages the main training workflow)
       - utils.py (the tool functions)
    - main.py (main training workflow)
@@ -25,16 +25,18 @@ DeepER contains the following files:
    - Script.py (sample script)
    - def_rloop.py (def the rloop region)
 - Data (the source data we use)
-      - RChIP.intersect.bed (source data)
-      - neg_5k.bed (extra negative data)
-      - Ind_testing.fasta (Independent testing set)
+  - RChIP.intersect.bed (source data)
+  - neg_5k.bed (extra negative data)
+  - Ind_testing.fasta (Independent testing set)
 - DeepER.yml (the conda environment)
 - readme.md (this file)
 
 ## Create a correspond environment
 Warning：please keep sure you have already install anaconda or mini-conda
 `conda env create -f DeepER-Train.yml`
+
 ## The Train process
+
 ### step1. Prepare data
 #### Positive data
 Use make_pos.py script to preprocess the positive source data 
@@ -66,7 +68,9 @@ python make_neg.py neg_5k.bed 10 ./data/negdata.bed
 The upon step will produce training bedfiles. But user need to transform them into fasta files.
 Use command
 `bedtools getfasta -fi refgenome -bed bedfile -fo outputpath -s -name`
+
 warnning: Please use -s and -name param to make sure next step can work.
+
 ### step2. Train model
 Use main.py to train a model..The command is as follow:
 ```bash
@@ -75,10 +79,7 @@ python main.py pos_train_data extra_neg_train_data validation_data validation_ex
 
 # pos_train_data: the positive rloop data to train the model
 # extra_neg_data: the extra negative data to train the model
-# validation_data: the validation data to indicate the training progress. 
-#  								 if validation_data is set to None,the pos_train_data and extra_neg_data 
-#                  will be cut into two part in the ratio of 7:2. the second part will be 
-#									 the validation set
+# validation_data: the validation data to indicate the training progress. If validation_data is set to None,the pos_train_data and extra_neg_data will be cut into two part in the ratio of 7:2. the second part will be the validation set
 # validation_extra_neg_data: the extra negative data to validate training progress.
 # para_save_path: the path which the model parameter saved
 ```
@@ -105,7 +106,7 @@ python script.py fastapath parapath strand ouputfile1 batchsize
 # output: the output file path.
 # batchsize: the larger number will speed up predict, but we lead to more memory cost.
 ```
-User can use def_region.py to change the probability file to bedfile.
+You can use def_rloop.py to process the probability file and get the relative position of each rloop interval in the input fasta file.
 ```bash
 python def_Rloop.py  cutoff probability_file outputfile
 
@@ -130,6 +131,7 @@ fa = quickloader(fasta,5000,bacth)
 ```
 #### step3. Predict the result
 ```python
+from lib import PreDict
 predict = PreDict(fa,DRBiLSTM,para,"hc","forward",True)
 a = predict.getallresults()
 ```
