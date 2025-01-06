@@ -134,11 +134,12 @@ def point_evaluate(pvalue,pred,label,mode="train"):
         TP = confusion_matrix_result[1, 1]  # 第1行和第1列表示正例
         FP = confusion_matrix_result[0, 1]  # 第0行和第1列表示负例预测为正例
         TN = confusion_matrix_result[0, 0]  # 第0行和第0列表示负例
+        FN = confusion_matrix_result[1, 0]  # 第1行和第0列表示正例预测为负例
     except:
         TP = 0
         FP = 0
         TN = 0 
-    FN = confusion_matrix_result[1, 0]  # 第1行和第0列表示正例预测为负例
+        FN = 0
 
     #计算P:准确率,R:召回率
     accuracy = (TP+TN)/(TP+FP+TN+FN)
