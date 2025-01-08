@@ -73,7 +73,7 @@ traindata = DataBuffer(
 traindata.addneg(
     path=extra_neg_data
 )
-if validata == "None":
+if validata != "None":
     testdata = DataBuffer(
         validata,
         maxlen,
