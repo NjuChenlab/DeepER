@@ -139,7 +139,7 @@ def point_evaluate(pvalue,pred,label,mode="train"):
         TP = 0
         FP = 0
         TN = 0 
-        FN = 0
+        FN = 1 # to avoid division by 0
 
     #计算P:准确率,R:召回率
     accuracy = (TP+TN)/(TP+FP+TN+FN)
