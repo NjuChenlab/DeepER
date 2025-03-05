@@ -496,6 +496,9 @@ class RandPreProcess():
                 lpad = randint(int(rs*pad[0]),int(rs*pad[1]))            
                 rpad = rs - lpad
                 start = a[1]-lpad
+                if start < 0:
+                    # 防止出现小于0情况
+                    continue
                 end = a[2]+rpad
                 rloopst = lpad
                 rlooped = lpad + length
